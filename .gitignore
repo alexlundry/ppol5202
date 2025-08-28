@@ -5,3 +5,6 @@
 
 # macOS system files
 .DS_Store
+
+# other
+week5_exercise.R
