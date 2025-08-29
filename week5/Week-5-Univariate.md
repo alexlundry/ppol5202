@@ -1,7 +1,7 @@
 PPOL 6802 Week 5 - Univariate Visualization
 ================
 Alex Lundry
-2025-08-28
+2025-08-29
 
 Today we’ll be learning how to create visualizations in R and ggplot2 of
 univariate data. For this demonstration we will be using the [Global
@@ -646,6 +646,40 @@ p1 %>%
 ```
 
 ![](Week-5-Univariate_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+
+------------------------------------------------------------------------
+
+*(Going back and reading this, I’m not very happy with my lack of detail
+on hjust, so here’s some more context…)*
+
+**What is “hjust”?** *hjust stands for horizontal justification. It
+controls the horizontal alignment of text elements relative to their
+specified position (e.g., left, center, right alignment). In ggplot2,
+hjust values range from 0 to 1, where:*
+
+- *0 aligns the text to the left (or start) of the specified position.*
+- *0.5 centers the text on the specified position. 1 aligns the text to
+  the right (or end) of the specified position.*
+- *Values outside 0 to 1 are permissible, causing the text to align
+  beyond the immediate start or end points relative to the positioning
+  point.*
+
+*In the above code, there are two geom_text layers used to add labels to
+the bars, differentiated by the size of the value n:*
+
+- *For large numbers (n \> 1000): hjust = 1 is used, meaning the text
+  labels for large numbers are right-aligned with their specified
+  position on the bars. This typically places these labels at the end
+  (right side) of the bars when using coord_flip(), making it clear and
+  avoiding overlap with the bar itself or other labels.*
+- *For smaller numbers (n \< 1000): hjust = 0.1 is slightly off from a
+  strict left alignment (0), nudging the labels a bit to the right from
+  the start of the bars. This subtle adjustment helps in placing these
+  smaller labels inside or just at the beginning of the bars, ensuring
+  they are readable and visually distinct from labels for larger
+  numbers.*
+
+------------------------------------------------------------------------
 
 That’s a good looking bar chart!
 
