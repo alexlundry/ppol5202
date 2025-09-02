@@ -1,0 +1,520 @@
+---
+title: "PPOL 5202 Week 10 - Geospatial"
+author: "Alex Lundry"
+date: "`r Sys.Date()`"
+output: github_document
+---
+
+There are several ways to create a map in R, but for the purposes of this course, we will focus on just a few specific components of map-making that you would find useful in the public policy world, and then lean into map-making in Tableau.  Here's what we will be covering in R:
+
+- Types of Geographic Data
+- Drawing Maps
+- Choropleth maps
+- Geocoding
+- Creating custom regions
+- Statebins/Hexbins
+
+We'll rely upon several packages along the way, but here are the first you'll need:
+
+```{r Load Libraries}
+# all necessary libraries for this tutorial
+# install.packages(c("tidyverse", "sf", "tigris", "tidygeocoder", "rnaturalearth", "rnaturalearthdata",
+#                    "statebins", "socviz", "tilegramsR"))
+
+library(tidyverse)
+library(sf)
+```
+
+### Types of Geographic Data
+
+Broadly, there are two types of geographic datasets that you are likely to find yourself working with:
+
+1. A collection of specific locations on a map (think addresses or pairs of latitude and longitude)
+2. Data aggregated to a specific unit of geography like zip code, or county, or state or country (think presidendential election results at the state level)
+
+#### Locations
+
+Many times when you receive geographic data, it will come to you in the form of text files, spreadsheets or databases that contain named locations and some associated data.  It may be something like the file below, North Carolina voting locations in the 2022 election.  We'll read it in (I had to get a little funky with the read-in command because a straight up `read_csv` wasn't working properly) and then use `glimpse` to see what it looks like:
+
+```{r}
+#  https://www.ncsbe.gov/results-data/polling-place-data
+g1 <- read_delim("data/nc_boe/polling_place_20221108.csv", delim = "\t", 
+                   locale = locale(encoding = "UTF-16LE"))
+
+glimpse(g1)
+```
+
+#### Aggregated Geographic Data
+
+The second kind aren't location points as in the NC board of elections data; instead think of what election results might look like.  Here are the 2020 presidential election results aggregated by media market:  
+
+```{r eval=FALSE, include=FALSE}
+# library(googlesheets4)
+# # Read in 2020 presidential results by DMA from a Daily Kos Google Sheet
+# dma_20 <- read_sheet(ss = "https://docs.google.com/spreadsheets/d/1LomW1QYbIBzcbS8lFxMpJM1OjdNZQX5JJBmDSMpeDWU/edit?usp=sharing",
+#            sheet = 1,
+#            range = "A2:G549",
+#            col_names = T) %>%
+#    janitor::clean_names()
+# 
+# write_csv(dma_20, "datasets/dmas/dma_20_results.csv")
+```
+
+```{r}
+dma_20 <- read_csv("data/dmas/dma_20_results.csv")
+
+glimpse(dma_20)
+```
+
+There are no SPECIFIC locations here.  Instead these data refer to geographic units - in this case DMAs - and tells us the aggregated performance of Biden and Trump within that territory.  
+
+*DMA stands for Designated Market Area, more commonly known as media markets.  It is essentially the broadcast television territory (what city's local news you get on the TV).  These are common units of analysis for political campaigns because of the massive amount of broadcast television advertising they purchase.*   
+
+#### Shape Files
+
+The problem with both of the above datasets is that our computer has no idea how to draw anything associated with them.  Yes it has fields like `state` and `zip` but these are insufficient to draw a map.  If we told ggplot to visualize the state field, it doesn't "know" what the state of Virginia looks like and how to draw it. We need to somehow get the data attached to ANOTHER dataset that has information on how to draw the geography. 
+
+This brings us to the other type of geographic data you will be working with:  
+
+- Spatial files, such as a shapefile or geoJSON file that contain actual geometries (points, lines or polygons).
+
+Here's what one part of a shapefile looks like:
+
+```{r}
+dma <- st_read("data/dmas/NatDMA.shp")
+
+glimpse(dma)
+```
+
+Notice a few interesting features of the data:
+
+- It is a special type of dataset called a "simple feature collection"
+- It has a lot of associated metadata with it, including something called a  "geodetic CRS"
+- Each row appears to be a distinct unit of geography that has data like its length in miles associated with it.
+- Each row contains a polygon, and there is a field called `geometry` that is labeled as a multipolygon.
+
+Let's look at one of those geometry fields up close:
+
+```{r echo=FALSE}
+dma[[14]][[2]][[1]][[1]]
+```
+
+It's a collection of coordinates!  Shape files are basically EXTREMELY detailed drawing instructions that we give to our computers: draw a line from this point to this point, and then from this point to this point, and so on, until we have a multipoint polygon shape that is the area we are visualizing!  Unlike the previous data, where the computer would have no idea what to draw, here it knows exactly what to draw.  
+
+A shapefile encodes points, lines, and polygons in geographic space, and is actually a set of files. Shapefiles appear with a .shp extension, sometimes with accompanying files ending in .dbf and .prj.
+
+When importing a shapefile, you need to ensure all the files are in the same folder.  This is the complete shapefile. If any of these files are missing, you will get an error importing your shapefile.
+
+### Drawing Maps
+
+In order to read shape files, we'll be using the **sf** library, which is an incredibly useful way to create maps in R.  There are many other ways to draw maps in R, but the **sf** package gives us the best mix of simplicity and robust functionality as well as integration into ggplot.  
+
+(If you're like me and need to know what things stand for, sf stands for "simple features" which refers to a formal standard (ISO 19125-1:2004) that describes how objects in the real world can be represented in computers.  Also, most of the functions in this package starts with prefix **st_** which stands for *spatial and temporal.*)
+
+For this demo, we'll work with a shapefile for DMAs.  Here's what's happening in the code below:
+
+- We use the `st_read()` function to turn a shapefile into a dataframe that is easier to work with.  This dataframe is saved in the form of a special data object called an `sf` (or simple features) object.  
+- We are taking the DMA name and pulling out the last 2 characters, which tells us the primary state associated with the DMA
+- We are limiting the DMAs displayed to only the continental United States (CONUS) - sorry Hawaii and Alaska.  
+- We are also removing the "National" DMA that covers the full country.
+- Finally, we are changing the underlying map projection using the `st_transform` function and telling it the projection we'd like it to use.  All shape files come pre-associated with a distinct projection.  I'll talk in more detail about this below.
+
+```{r}
+dma <- st_read("data/dmas/NatDMA.shp")
+
+dma_conus <- dma %>% 
+   mutate(state_prime = str_sub(NAME, start = -2)) %>% 
+   filter(!state_prime %in% c("HI", "AK"),
+          NAME != "National") %>% 
+   st_transform('EPSG:6350')
+```
+
+In the `st_transform` function, the information we gave it was obtained from EPSG.org[https://epsg.org] which has a collection of standardized map projections.  You use the search function to tell it the projection you like and the general geographic area you are visualizing.  It will tell you the code that will display the best for your circumstances.  You can think of the this as sort of "camera lens" for your visualization.  When taking a photo lenses ensure that you are representing your subject appropriately.  A lens distorts the image in specific ways that can be more or less helpful in specific situations.  The EPSG code contains information on the map projection you are using AND the specific area of the world you are visualizing.  The projection does macro adjustments to the image and the specific area of the world provides micro adjustments. Here we are giving it a code for an Albers projection of the continental United States.
+
+So we now have a well-prepared dataset that is capable of drawing a map.  The `geom_sf()` function allows you to plot geospatial objects in any **ggplot2** object. Since the x and y coordinates are implied by the geometry of the sf object, you don’t have to explicitly bind the x aesthetic to the longitudinal coordinate and the y aesthetic to the latitude. 
+
+```{r}
+ggplot(dma_conus) + 
+   geom_sf()
+```
+
+Congratulations!  You just made your first map.  Remember that it is an Albers projection of the continental United States showing us how media markets are distributed.
+
+But what if you hate Albers projections and you are ride or die for Mercator?  Well, that's weird, but fine.  It's easy enough to change by simply calling `st_transform` and passing it an EPSG code that corresponds to the Mercator projector:
+
+```{r}
+dma_conus %>% 
+   st_transform('EPSG:3857') %>% 
+   ggplot() + 
+   geom_sf()
+```
+
+Check out that straight as an arrow northern border!  But it's still not that helpful.  How can we make this more interesting?  We can turn it into a choropleth map.
+
+### Choropleth Maps
+
+Choropleth Maps are thematic maps in which areas are shaded or patterned in proportion to the measurement of the statistical variable being displayed on the map, such as population density or per-capita income. So we need to first begin by having data to display.  
+
+The easiest way to do this is simply adding a column to the map data that contains the value we want to represent with a color.  So let's do something VERY simple and create a column that has the length of the DMA name and map this to a fill color.
+
+```{r}
+dma_name <- dma_conus %>%
+   mutate(length=str_length(NAME))
+
+glimpse(dma_name)
+```
+
+Because we are working with ggplot, creating a choropleth map where the fill encodes a numeric variable is as easy as passing that numeric data to a fill aesthetic:
+
+```{r}
+ggplot(dma_name, aes(fill = length)) + 
+   geom_sf() 
+```
+
+Nice! But let's make this much more real.  Let's say you've been asked to put together a slide that shows the 2020 presidential election results by DMA in the commonwealth of Virginia.  Let's go through how we would do that in detail, while also cleaning up the results to make this a presentation caliber quality.
+
+First, we'll filter the national DMA map just to Virginia.  We'll filter based on the `Key` value in the dataset, which corresponds to an ID that is frequently used when dealing with media markets: the DMA FIPs code.  To find out which DMAs are in Virginia, you can just google "Virginia DMA map" and usually one of the first results in the image search will provide you with a list of DMAs.  That list, along with a website like https://www.spstechnical.com/DMACodes.htm which has the DMA FIPs codes associated with each media market, will help you narrow things down.  
+
+```{r}
+
+va_dma_fips <- c(511, 584, 556, 573, 544, 531, 559, 518, 560, 569)
+
+va_dma_sf <- dma_conus %>%
+   filter(Key %in% va_dma_fips) %>% 
+   mutate(key = as.numeric(Key)) %>% # the key comes in as a string, but we'll want to convert it to numeric so we can join on it later with another dataset
+   select(-Key) %>% # getting rid of the previous Key variable that wasn't numeric
+   st_transform('EPSG:32047')
+
+va_dma_sf
+```
+
+You'll notice that in the above code the last thing I did was change the EPSG code to account for the fact that we are focused in on Virginia (I found a good one by searching the EPSG website for "virginia").
+
+Similarly, let's narrow down the results data to just Virginia. That's easy to do because it has a state field.  BUT, I'm going to have to eventually join this into the other data by DMA. So what I've done in the code below is just created a new dataset with one variable that has the same name as the DMA variable in our other dataset (`Key`) and then I'm binding it to the results data. I just looked at the VA dma names and manually matched up the order of the ids.  
+
+```{r}
+# filter the data down to just Virginia DMAs
+va_dma_20 <- dma_20 %>% 
+   filter(state == "VA")
+
+# but the data doesn't come with DMA FIPs codes attached
+# that's what we need to join it to the DMA SF data
+# so I create a new dataset that has just the FIPS codes
+# in the order they appear in the va_dma_20 data
+# notice that they are also numeric and have the same variable name
+# as the other dataset that we are going to join into eventually
+# I used this website: https://www.spstechnical.com/DMACodes.htm
+va_dma_codes <- tibble(key = c(559, 584, 518, 569, 544, 560, 556, 573, 531, 511))
+
+# I use a bind columns function to fuse the two datasets together
+va_dma_20 <- bind_cols(va_dma_20, va_dma_codes)
+
+va_dma_20
+```
+
+Now that we have good clean data, let's join them together.  Note that we left_join the 2020 results data into the SF data file.  We do this in order to maintain it as an SF data file so that it can be mapped easily.  If you are rusty on joins, it allows you to essentially link one table to another by a shared variable.  In this case, the shared variables are both named `key`.  Doing a left join means that for each row in the first listed data set, it looks to find a matching `key` in the second data and then appends variables from the second to the first.  
+
+```{r}
+va_dma_20 <- left_join(va_dma_sf, va_dma_20, by = "key")
+
+va_dma_20
+```
+
+Once we have them joined, we can map it using `geom_sf` and set the fill to `biden_percent` variable.  I've also added here a `scale_fill` call so that we can use a pre-built palette.  I chose "Blues" initially because we are visualizing a Democrat's results, and set direction = 1 so that the higher values get the darker blue.  
+
+```{r}
+ggplot(va_dma_20, aes(fill = biden_percent)) +
+   geom_sf() +
+   scale_fill_distiller(palette = "Blues", direction = 1)
+```
+
+This is interesting, but we've lost the actual state!  DMAs have no regard for state boundaries so this just comes out as a large blob.  It would be helpful here to have an outline of the state of Virginia here!  To do that, we need to get map data for Virginia.  
+
+We do that by getting sf objects for both the state AND its counties.  For that, we turn to another useful package, the `tigris` package, which contains mapping data for the US, US states and US counties. To get those we call two special tigris functions: `counties` which we can filter down to a specific state if we like, and `states` where again we can filter by state.  It gets us separate sf objects that can then be mapped. 
+
+```{r}
+library(tigris)
+
+# Download spatial data for all US counties
+counties <- counties(state = "Virginia")
+
+state <- states() %>% filter(NAME == "Virginia")
+```
+
+But wait!  There is one thing we need to check first.  When we obtained the county and state data, we can't be sure that they are using the same projection/CRS as our Virginia data.  So we have to check it.  We do this by calling `st_crs` on each object, and the output will tell us the EPSG code that it is using:
+
+```{r}
+st_crs(counties)
+```
+
+We are using 32047 as our EPSG projection "lens".  But it looks like for this data it is 4269!  What about the state data?
+
+```{r}
+st_crs(state)
+```
+
+Same!  Ok, let's change both of them.  We know how to do this already!   We call `st_transform`:
+
+```{r}
+counties <- st_transform(counties, 'EPSG:32047')
+state <- st_transform(state, 'EPSG:32047')
+```
+
+Now that we have everything sorted we can proceed.  Remember that maps are made in layers!  So to add state and county lines, we must add a new `geom_sf` layer with new data attached.  And we must be mindful of the order in which they are listed!  It will build this in layers, first setting down the initial geom_sf call, and then putting the second on top of it, and so on.  
+
+Below is a first go...notice that we must still have the "empty" geom_sf to visualize the `va_dma_20` dataset.  But then also notice that in the two new geom_sf's we must specify the data, which makes sense, and we must also specify that fill = NA.  If we did not do the latter, it would not work because it would try to fill it with "biden_percent" thanks to the rules of inheritance from the intial ggplot call.  
+
+```{r}
+ggplot(va_dma_20, aes(fill = biden_percent)) +
+   geom_sf() +
+   scale_fill_distiller(palette = "Blues", direction = 1) +
+   geom_sf(data = counties, fill = NA) +
+   geom_sf(data = state, fill = NA) + 
+   theme_void() +
+   labs(title = "Biden 2024 % by Virginia DMA",
+        fill = "% Biden")
+```
+
+This is better, but still not great.  Below is the code I came up with after experimenting with different layer orders, as well as making adjustments to the palette and it's transparency, as well as to border line width and color.  I've also added a new geom `geom_sf_text` which is how we add labels to an sf object.  (There is also a `geom_sf_label` that acts similarly).  
+
+```{r}
+ggplot(va_dma_20, aes(fill = biden_percent)) +
+   scale_fill_distiller(palette = "RdBu", type = "div", direction = 1) +
+   geom_sf(data = counties, fill = NA, color = "grey") +
+   geom_sf(color = "grey", alpha = 0.8) +
+   geom_sf(data = state, fill = NA, color = "black", linewidth = 0.5) + # Add Virginia outline
+   geom_sf_text(aes(label = str_wrap(NAME, 8)), size = 2, color = "black") +
+   theme_void() +
+   labs(title = "Biden 2024 % by Virginia DMA",
+        fill = "% Biden")
+```
+
+### Geocoding and Adding Points to a Map
+
+So we've learned how to map aggregated data.  But what about collection of points?  Perhaps you have a set of locations and you need to simply show them on a map.  For that, you'll usually have addresses (partial or full) and you need to have the appropriate latitude and longitude in order to actually display it on a map.  For that, you'll need to geocode. You can do this in a package called **tidygeocoder**.  
+
+In order to demonstrate this, we'll use a dataset of the hometowns of a previous class of students that I obtained during the intro survey of the class.  First, we load the library and make a dataframe:
+
+```{r}
+library(tidygeocoder)
+
+hometowns <- tibble("hometown" = c("India","New Orleans, LA", "Chicago", "Greenville, SC","Los Angeles",
+               "Central Pennsylvania", "New Delhi, India", "Syracuse, NY", "Shenzhen, China",
+               "Bangalore, India", "China", "Grand Rapids, MI", "Nicaragua", "San Antonio, TX",
+               "China", "Abu Dhabi, United Arab Emirates", "China", "Hinsdale, IL",
+               "Waukesha, WI", "Chongqing, China", "Bucks County, PA", "Chicago",
+               "Seattle", "Nashville", "Milford, Michigan", "Seattle", "Shanghai, China",
+               "Miami", "Sao Paulo, Brazil", "Palo Alto", "Livermore, CA"))
+
+hometowns
+```
+
+You'll note that we have a mix of location types here: some where just the country is listed, some city/state combinations, sometimes just a city, one that even just has a region ("Central Pennsylvania").  Fortunately, **tidygeocoder** elegantly handles all of those variations without any fussiness.  
+
+To "forward-geocode" the data we call the `geocode()` function, passing it the data and telling it what column the addresses are in.  It uses the Open Street Map geocoding service here, but other services can be specified with the method argument. Please note that the geocoding can take a non-trivial amount of time to run.
+
+Only latitude and longitude are returned from the geocoding service in this example, but `full_results = TRUE` can be used to return all of the data from the geocoding service.
+
+```{r}
+lat_longs <- hometowns %>%
+  geocode(hometown, method = 'osm', lat = latitude , long = longitude)
+
+lat_longs
+```
+
+We've now got a latitude and longitude.  Our next step is to convert this dataset into a format that plays well with our mapping library, `sf`.  To do that, we need to convert it into a sf object:
+
+- `st_as_sf()` converts this data frame to an sf object. Because this is collection of points, and NOT a collection of shapes, we must pass it a **coords** argument that specifies which columns contain the longitude and latitude data.
+- `crs = 4326` sets the coordinate reference system to WGS 84, which is standard for geographic coordinates.
+- This will create a point `sf` object where each point corresponds to a pair of longitude and latitude values in your data. You can then use this sf object for spatial analysis or plotting using sf-compatible tools in R.
+
+```{r}
+h2 <- st_as_sf(lat_longs, coords = c("longitude", "latitude"), crs = 4326)
+
+glimpse(h2)
+```
+
+Take a look at the dataset now - it has the original hometown column, but now, in the place of the latitude and longitude column, it has a geometry column that contains the points.
+
+We can also use tidygeocoder to perform reverse geocoding (obtaining addresses from geographic coordinates), we can use the `reverse_geocode()` function. The arguments are similar to the `geocode()` function, but now we specify the input data columns with the lat and long arguments. The input dataset used here is the results of the geocoding query above.
+
+The single line address is returned in a column named by the address argument and all columns from the geocoding service results are returned because full_results = TRUE. You'll see the wealth of data we get back from the service:
+
+```{r}
+reverse <- lat_longs %>%
+  reverse_geocode(lat = latitude, long = longitude, method = 'osm',
+                  address = address_found, full_results = TRUE)
+
+glimpse(reverse)
+```
+
+Ok, we've got this great geocoded data - let's map it!
+
+```{r}
+ggplot(h2) +
+   geom_sf()
+```
+
+That doesn't get us what we want!  It only gave us the points in space, but there's no base map to help us understand where those points are.  So we've got to get a base map in a mappable sf object.  Unfortunately the `tigris` library is just for the US.  So we can go to another reputable library with a good world map: `rnaturalearth`. We call the natural earth countries function and designate that we want a medium size map when it comes to details. 
+
+```{r}
+library(rnaturalearth)
+
+world <- ne_countries(scale = "medium")
+```
+
+We then add this basemap to our previous ggplot call, being sure that it goes first, because this is layered system.
+
+```{r}
+ggplot() +
+   geom_sf(data = world) +
+   geom_sf(data = h2, color = "red")
+```
+
+### Creating Custom Regions
+
+It is likely that you will frequently be asked to calculate statistics for custom regions, and these will frequently be made up of unique combinations of pre-existing regions like counties or states.  
+
+Let's say that you work for an organization that is focused in the Northeastern United States, and you are especially interested in the area around New York City.  Below I've created some fake data that reflects that.  
+
+- *(Quick detail on the R code for those interested here:  R comes preloaded with some vectors related to US states.  I've bound these vectors together into a dataframe, while also giving them helpful variable names.  Next, I filter to just the Northeast, then I create two new variables.  The first is data that fakes the total amount donated to your organization from each state - there are 9 states in the Northeast so I'm generating 9 instances of a normally distributed variable with a mean of 500K and a standard deviation of 250K.  Then I'm creating a region variable where it is "Important Region" if it is NY, NJ, PA or CT, otherwise it is unimportant.  Finally, in order to make matching and joining easier later on, I'm making the state name all lower case).*
+
+```{r}
+fake_data <- bind_cols(abb = state.abb, 
+                       name = state.name, 
+                       region = state.region) %>% 
+   filter(region == "Northeast") %>% 
+   mutate(fake_donations = rnorm(9, 500000, 250000),
+          region = case_when(abb %in% c("NY", "NJ", "PA", "CT") ~ "Important Region",
+                             .default = "Not Important"),
+          name = str_to_lower(name))
+
+glimpse(fake_data)
+```
+
+Let's grab an sf object for the US using tigris, and I'm then filtering it to just the Northeast states (by referencing the abbreviation variable in the fake_data dataset)
+
+```{r}
+# Download all US counties
+northeast <- states() %>% filter(STUSPS %in% fake_data$abb)
+```
+
+Once that is loaded the next step is to join them together.  Remember to always do a left_join INTO the sf object so that it remains an sf object.
+
+```{r}
+us <- left_join(northeast, fake_data, by = c("STUSPS" = "abb"))
+
+us
+```
+
+Creating the new region is frighteningly easy.  Because the sf object is a tidy dataset, you can use standard **dplyr** functions on it and it will behave as you would expect.  You'll see that the new sf object is a dataset consisting only of two records: one for each region in our dataset. 
+
+```{r}
+us_new <- us %>% 
+    group_by(region) %>% 
+    summarize()
+
+us_new
+```
+
+We want to show this new region, but also want to show the underlying states, so we make two `geom_sf` calls, the first to the underlying base map of the states, then another that calls the new custom region dataset, fills by that new region, and sets a low alpha number so that we can see the state borders underneath.  We have the color legend, but we can also directly label on the map by calling `geom_sf_label`.  (Remember you could alternatively use `geom_sf_text`).
+
+```{r}
+ggplot(us) +
+   geom_sf() +
+   geom_sf(data = us_new, aes(fill = region), alpha = 0.3) +
+   geom_sf_label(data = us_new, aes(label = region)) +
+   theme_void()
+```
+
+### Cartograms / Statebins / Hexbins
+
+In our lecture, we discussed the different types of cartograms and one of those was a Dorling cartogram in which geographies are represented by specific shapes.  Recently, one popular way to visualize these are to use either hexagrams (hexbins).  The **tilegramsR** package provides a large number of sf objects that are easily mapped corresponding to various popular versions of tilegrams by news agencies.
+
+Let's take a closer look at the package using a 50 state hexagonal one from NPR (most of the remaining ones are electoral college ones). You can see a full list here: https://bhaskarvk.github.io/tilegramsR/articles/UsingTilegramsInR.html
+
+We'll use a package called **socviz** so we can easily get some election data for our example.  Remember that we must join the data of interest into the sf object, so here we are doing a left_join, where we link `election` into `sf_NPR1to1`, mapping the `st` variable in the latter to the `state` variable in the former.
+
+```{r}
+library(tilegramsR)
+library(socviz) # so we can easily get some recent election data
+
+left_join(sf_NPR1to1, election, by = c("state" = "st")) %>% 
+   ggplot() +
+   geom_sf(aes(fill = winner)) +
+   geom_sf_text(aes(label = state), color = "white") +
+   scale_fill_manual(values = c("Clinton" = "blue", 
+                                "Trump" = "red")) +
+   theme_void() +
+   labs(title = "NPR State Hexbins",
+        fill = "2016 Pres Winner")
+```
+
+And here's an example using continuous data:
+
+```{r}
+left_join(sf_NPR1to1, election, by = c("state" = "st")) %>% 
+   ggplot() +
+   geom_sf(aes(fill = pct_trump), color = "grey") +
+   geom_sf_text(aes(label = state)) +
+   scale_fill_gradient2(low = "blue", high = "red",
+                        midpoint = 50,
+                        limit = c(0,100)) +
+   theme_void() +
+   labs(title = "NPR State Hexbins",
+        fill = "% Trump")
+
+
+```
+
+You can see a full list here: https://bhaskarvk.github.io/tilegramsR/articles/UsingTilegramsInR.html
+
+But a few ones worth seeing...here's another NPR state-based cartogram:
+
+```{r}
+ggplot() +
+   geom_sf(data = sf_NPR.DemersCartogram) +
+   theme_void() +
+   labs(title = "NPR Demers Cartogram")
+```
+
+Here's a 538 electoral college one:
+
+```{r}
+ggplot() +
+   geom_sf(data = sf_FiveThirtyEightElectoralCollege) +
+   geom_sf(# layer containing state hexagons
+      data = sf_FiveThirtyEightElectoralCollege.states,
+      color = "black",  # state boundaries
+      alpha = 0,  # transparent
+      size = 1  # thickness
+   ) +
+   theme_void() +
+   labs(title = "Five Thirty Eight Electoral College")
+```
+Daily Kos electoral college:
+
+```{r}
+
+ggplot() +
+   geom_sf(data = sf_DKOS_Electoral_College_Map_v1) +
+   theme_void() +
+   labs(title = "Daily Kos Electoral College")
+```
+
+Daily Kos Congressional Districts:
+
+```{r}
+ggplot() +
+   geom_sf(data = sf_DKOS_CD_Hexmap_v1.1) +
+   geom_sf(# layer containing state hexagons
+      data = sf_DKOS_CD_Hexmap_v1.1.states,
+      color = "black",  # state boundaries
+      alpha = 0,  # transparent
+      size = 1  # thickness
+   ) +
+   theme_void() +
+   labs(title = "Daily Kos Congressional Districts")
+```
+
+There are a number of other options including versions for Germany and France, as well as tilegrams made by the *Washington Post*, the *Wall Street Journal* and *Datamap.io*.

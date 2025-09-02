@@ -1,0 +1,53 @@
+state_name,state_abbr,med_income
+Alabama,AL,52035
+Alaska,AK,77790
+Arizona,AZ,61529
+Arkansas,AR,49475
+California,CA,78672
+Colorado,CO,75231
+Connecticut,CT,79855
+Delaware,DE,69110
+District of Columbia,DC,90842
+Florida,FL,57703
+Georgia,GA,61224
+Hawaii,HI,83173
+Idaho,ID,58915
+Illinois,IL,68428
+Indiana,IN,58235
+Iowa,IA,61836
+Kansas,KS,61091
+Kentucky,KY,52238
+Louisiana,LA,50800
+Maine,ME,59489
+Maryland,MD,87063
+Massachusetts,MA,84385
+Michigan,MI,59234
+Minnesota,MN,73382
+Mississippi,MS,46511
+Missouri,MO,57290
+Montana,MT,56539
+Nebraska,NE,63015
+Nevada,NV,62043
+New Hampshire,NH,77923
+New Jersey,NJ,85245
+New Mexico,NM,51243
+New York,NY,71117
+North Carolina,NC,56642
+North Dakota,ND,65315
+Ohio,OH,58116
+Oklahoma,OK,53840
+Oregon,OR,65667
+Pennsylvania,PA,63627
+Rhode Island,RI,70305
+South Carolina,SC,54864
+South Dakota,SD,59896
+Tennessee,TN,54833
+Texas,TX,63826
+Utah,UT,74197
+Vermont,VT,63477
+Virginia,VA,76398
+Washington,WA,77006
+West Virginia,WV,48037
+Wisconsin,WI,63293
+Wyoming,WY,65304
+Puerto Rico,PR,21058

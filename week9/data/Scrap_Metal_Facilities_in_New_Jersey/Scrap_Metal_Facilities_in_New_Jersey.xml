@@ -1,0 +1,732 @@
+<?xml version="1.0" encoding="UTF-8"?><metadata>
+    <idinfo>
+        <citation>
+            <citeinfo>
+                <origin/>
+                <pubdate>20241201</pubdate>
+                <title>Scrap Metal Environmental Justice Regulated Facilities, Edition 20241201 (Util_scrapmetal_facility)</title>
+                <geoform>vector digital data</geoform>
+                <pubinfo>
+                    <pubplace/>
+                    <publish>NJ Department of Environmental Protection (NJDEP)</publish>
+                </pubinfo>
+                <othercit>The NJDEP may distribute GIS data in a variety of formats, such as the ESRI shapefile and/or various versions of the file geodatabase format. The data also may be available for viewing on various profiles of the NJ GeoWeb online mapping application.</othercit>
+                <onlink>https://www.nj.gov/dep/gis</onlink>
+                <onlink>https://gisdata-njdep.opendata.arcgis.com</onlink>
+                <onlink>https://www.nj.gov/dep/gis/geowebsplash.htm</onlink>
+            </citeinfo>
+        </citation>
+        <descript>
+            <abstract>New Jersey’s Environmental Justice (EJ) Law identifies 8 specific categories of facility types that are regulated by the law. One category, “scrap metal facility”, consists of facilities regulated by various different Department programs, including air, water, right to know and site remediation, and were never collated into one database as “scrap metal”. This layer now identifies these as a specific EJ category regulated under the new law and subject to future Department rulemakings.</abstract>
+            <purpose>This dataset will enable NJDEP to comply with the Environmental Justice Law. It will also help provide Healthy Community Planning Reports and other analysis.</purpose>
+        </descript>
+        <timeperd>
+            <timeinfo>
+                <sngdate>
+                    <caldate>20210810</caldate>
+                </sngdate>
+            </timeinfo>
+            <current>publication date</current>
+        </timeperd>
+        <status>
+            <progress>Complete</progress>
+            <update>As needed</update>
+        </status>
+        <spdom>
+            <bounding>
+                <westbc>-75.562661</westbc>
+                <eastbc>-73.914848</eastbc>
+                <northbc>41.35209</northbc>
+                <southbc>38.931107</southbc>
+            </bounding>
+        </spdom>
+        <keywords>
+            <theme>
+                <themekt>ISO 19115 Topic Category</themekt>
+                <themekey>environment</themekey>
+            </theme>
+            <theme>
+                <themekt>None</themekt>
+                <themekey>NJDEP</themekey>
+                <themekey>scrap yard</themekey>
+                <themekey>EJ</themekey>
+                <themekey>Util_scrapmetal_facility</themekey>
+                <themekey>stressor</themekey>
+                <themekey>scrap metal</themekey>
+                <themekey>regulated facilities</themekey>
+                <themekey>environmental justice</themekey>
+                <themekey>NJDEPTrentonMetadata</themekey>
+            </theme>
+            <place>
+                <placekt>None</placekt>
+                <placekey>NJ</placekey>
+                <placekey>New Jersey</placekey>
+            </place>
+        </keywords>
+        <accconst>A downloadable shapefile (.zip) version of this layer is also available. Information to download the shapefile can be found in the Distribution Section of this metadata record. This data layer is shown in the NJDEP's NJ-GeoWeb mapping application accessible through the Online Linkage: https://www.nj.gov/dep/gis/geowebsplash.htm</accconst>
+        <useconst>New Jersey Department of Environmental Protection (NJDEP) Data Distribution Agreement. The data provided herein are distributed subject to the following conditions and restrictions: NJDEP assumes no responsibility to maintain them in any manner or form and disclaims any duty or obligation to either maintain availability of or to update the data. Terms of Agreement 1. All data is provided, as is, without any representation or warranty of any kind, implied, expressed or statutory including, but not limited to, the warranties of non-infringement of third party rights, title, merchantability or fitness for a particular use, freedom from computer virus nor are any such warranties to be implied with respect to the digital data layers furnished hereunder. User is responsible for understanding the accuracy limitations of all digital data layers provided herein, as documented in the accompanying cross-reference files (see SUPPLEMENTAL INFORMATION). Any reproduction or manipulation of the above data must ensure that the coordinate reference system remains intact. 2. Digital data received from the NJDEP may not be reproduced or redistributed without all the metadata provided. 3. Any maps, publications, reports, or other documents produced as a result of this project that utilize this digital data will credit the NJDEP's Geographic Information System (GIS) as the source of the data with the following credit/disclaimer: 'This (map/publication/report) was developed using New Jersey Department of Environmental Protection Geographic Information System digital data, but this secondary product has not been verified by NJDEP and is not state-authorized or endorsed.' 4. NJDEP makes no warranty that digital data are free of Copyright or Trademark claims or other restrictions or limitations on free use or display. Making a copy of this data may be subject to the copyright of trademark laws.</useconst>
+        <ptcontac>
+            <cntinfo>
+                <cntorgp>
+                    <cntorg>New Jersey Department of Environmental Protection (NJDEP), Bureau of NJPDES Stormwater Permitting &amp; Water Quality Management</cntorg>
+                    <cntper>Gabriel Mahon</cntper>
+                </cntorgp>
+                <cntaddr>
+                    <addrtype>physical</addrtype>
+                    <address>501 East State Street</address>
+                    <city>Trenton</city>
+                    <state>NJ</state>
+                    <postal>08625</postal>
+                </cntaddr>
+                <cntvoice>609-292-5493</cntvoice>
+                <cntemail>Gabriel.Mahon@dep.nj.gov</cntemail>
+            </cntinfo>
+        </ptcontac>
+        <datacred/>
+        <native>ESRI ArcCatalog 10.8.1</native>
+    </idinfo>
+    <dataqual>
+        <logic>No topology tests were conducted.</logic>
+        <complete>This dataset only includes a subset of records from the NJEMS Sites layer using the following queries: - NJEMS Sites with SIC code 5093 or 5015 - NJPDES permits with Discharge Category Description= "Scrap Metal Processing (GP) (SM2)" Or "Scrap Metal Processing/Auto Recycling (GP) (SM)" Or "Vehicle Recycling (GP) (RVR)" or individual permits (IP) in the stormwater program that relate to scrap metal. </complete>
+        <lineage>
+            <srcinfo>
+                <srccite>
+                    <citeinfo>
+                        <origin/>
+                        <pubdate>20210810</pubdate>
+                        <title>New Jersey Environmental Management System (NJEMS) Sites (Envr_NJEMS_site)</title>
+                        <geoform>vector digital data</geoform>
+                        <pubinfo>
+                            <pubplace/>
+                            <publish>New Jersey Department of Environmental Protection (NJDEP), Division of Information Technology (DOIT), Bureau of Geographic Information Systems (BGIS)</publish>
+                        </pubinfo>
+                    </citeinfo>
+                </srccite>
+                <srcscale>2400</srcscale>
+                <typesrc>hardcopy</typesrc>
+                <srctime>
+                    <timeinfo>
+                        <sngdate>
+                            <caldate>20210810</caldate>
+                        </sngdate>
+                    </timeinfo>
+                    <srccurr>ground condition</srccurr>
+                </srctime>
+                <srccitea>NJEMS Sites</srccitea>
+                <srccontr>The sites in the Scrap Metal Facilities layer are a subset of NJEMS sites based on NJEMS Webi queries</srccontr>
+            </srcinfo>
+            <procstep>
+                <procdesc>The sites in the layer are a subset of NJEMS sites based on NJEMS Webi queries completed 20210810. The Webi queries include: - NJEMS Sites with SIC code 5093 or 5015 - NJPDES permits with Discharge Category Description= "Scrap Metal Processing (GP) (SM2)" Or "Scrap Metal Processing/Auto Recycling (GP) (SM)" Or "Vehicle Recycling (GP) (RVR)" or individual permits (IP) in the stormwater program that relate to scrap metal. </procdesc>
+                <procdate>20210810</procdate>
+                <proccont>
+                    <cntinfo>
+                        <cntorgp>
+                            <cntorg>New Jersey Department of Environmental Protection (NJDEP), Bureau of NJPDES Stormwater Permitting &amp; Water Quality Management</cntorg>
+                            <cntper>Gabriel Mahon</cntper>
+                        </cntorgp>
+                        <cntaddr>
+                            <addrtype>physical</addrtype>
+                            <address>501 East State Street</address>
+                            <city>Trenton</city>
+                            <state>NJ</state>
+                            <postal>08625</postal>
+                        </cntaddr>
+                        <cntvoice>609-292-5493</cntvoice>
+                        <cntemail>Gabriel.Mahon@dep.nj.gov</cntemail>
+                    </cntinfo>
+                </proccont>
+            </procstep>
+        </lineage>
+    </dataqual>
+    <spdoinfo>
+        <direct>Vector</direct>
+        <ptvctinf>
+            <sdtsterm>
+                <ptvctcnt>440</ptvctcnt>
+            </sdtsterm>
+        </ptvctinf>
+    </spdoinfo>
+    <eainfo>
+        <detailed>
+            <enttyp>
+                <enttypl>Util_scrapmetal_facility</enttypl>
+                <enttypd>Scrap Metal Environmental Justice Regulated Facilities</enttypd>
+                <enttypds>NJDEP</enttypds>
+            </enttyp>
+            <attr>
+                <attrlabl>OBJECTID</attrlabl>
+                <attrdef>Internal feature number.</attrdef>
+                <attrdefs>ESRI</attrdefs>
+                <attrdomv>
+                                        					
+                    
+                    <udom>Sequential unique whole numbers that are automatically generated.</udom>
+                                        				
+                
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>SITE_ID (Alias: Site ID)</attrlabl>
+                <attrdef>The unique site identifier in the NJEMS database.</attrdef>
+                <attrdefs>NJDEP</attrdefs>
+                <attrdomv>
+                                        					
+                    
+                    <udom>Unique value</udom>
+                                        				
+                
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>SITE_NAME (Alias: Site Name)</attrlabl>
+                <attrdef>Name of the site as stored in the NJEMS database.</attrdef>
+                <attrdefs>NJDEP</attrdefs>
+                <attrdomv>
+                                        					
+                    
+                    <udom>Unique value</udom>
+                                        				
+                
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>ADDRESS_LINE_1 (Alias: Address Line 1)</attrlabl>
+                <attrdef>The primary address line field associated with the NJEMS site.</attrdef>
+                <attrdefs>NJDEP</attrdefs>
+                <attrdomv>
+                                        					
+                    
+                    <udom>Unique value</udom>
+                                        				
+                
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>CITY (Alias: City)</attrlabl>
+                <attrdef>The city or town in which the site is located</attrdef>
+                <attrdefs>NJDEP</attrdefs>
+                <attrdomv>
+                                        					
+                    
+                    <udom>Unique value</udom>
+                                        				
+                
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>COUNTY (Alias: County)</attrlabl>
+                <attrdef>The county in which the site is located.</attrdef>
+                <attrdefs>NJDEP</attrdefs>
+                <attrdomv>
+                                        					
+                    
+                    <udom>Unique value</udom>
+                                        				
+                
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>MUNICIPALITY (Alias: Municipality)</attrlabl>
+                <attrdef>The municipality in which the site is located (NJEMS value)</attrdef>
+                <attrdefs>NJDEP</attrdefs>
+                <attrdomv>
+                                        					
+                    
+                    <udom>Unique value</udom>
+                                        				
+                
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>X_COORD_NUM (Alias: NJSPC83 Easting (X))</attrlabl>
+                <attrdef>X coordinate (East-West) value. Represented as the Easting value in the NJ State Plane Coordinate System (NAD83) in US feet units.</attrdef>
+                <attrdefs>NJDEP</attrdefs>
+                <attrdomv>
+                                        					
+                    
+                    <udom>Unique value</udom>
+                                        				
+                
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>Y_COORD_NUM (Alias: NJSPC83 Northing (Y))</attrlabl>
+                <attrdef>Y coordinate (North-South) value. Represented as the Northing value in the NJ State Plane Coordinate System (NAD83) in US feet units.</attrdef>
+                <attrdefs>NJDEP</attrdefs>
+                <attrdomv>
+                                        					
+                    
+                    <udom>Unique value</udom>
+                                        				
+                
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>COORD_SYS (Alias: Coordinate System)</attrlabl>
+                <attrdef>The site coordinate's coordinate system.</attrdef>
+                <attrdefs>NJDEP</attrdefs>
+                <attrdomv>
+                                        					
+                    
+                    <udom>Unique value</udom>
+                                        				
+                
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>COORD_TYPE (Alias: Coordinate Type)</attrlabl>
+                <attrdef>How the site's coordinate location was determined.</attrdef>
+                <attrdefs>NJDEP</attrdefs>
+                <attrdomv>
+                                        					
+                    
+                    <edom>
+                                                						
+                        
+                        <edomv>GPS</edomv>
+                                                						
+                        
+                        <edomvd>The site coordinate was captured using code-based differential GPS.</edomvd>
+                                                						
+                        
+                        <edomvds>NJDEP</edomvds>
+                                                					
+                    
+                    </edom>
+                                        				
+                
+                </attrdomv>
+                <attrdomv>
+                                        					
+                    
+                    <edom>
+                                                						
+                        
+                        <edomv>DEP Program Database</edomv>
+                                                						
+                        
+                        <edomvd>The site coordinate was obtained from a NJDEP program database (pre-NJEMS).</edomvd>
+                                                						
+                        
+                        <edomvds>NJDEP</edomvds>
+                                                					
+                    
+                    </edom>
+                                        				
+                
+                </attrdomv>
+                <attrdomv>
+                                        					
+                    
+                    <edom>
+                                                						
+                        
+                        <edomv>Exact Address Match</edomv>
+                                                						
+                        
+                        <edomvd>The site coordinate was generated through an address matching process.  In this instance the match was made to the address number and street.</edomvd>
+                                                						
+                        
+                        <edomvds>NJDEP</edomvds>
+                                                					
+                    
+                    </edom>
+                                        				
+                
+                </attrdomv>
+                <attrdomv>
+                                        					
+                    
+                    <edom>
+                                                						
+                        
+                        <edomv>Digital Image</edomv>
+                                                						
+                        
+                        <edomvd>The site coordinate was determined with the aid of a digital orthophoto image, either the 1995-97 or 2002 image series.</edomvd>
+                                                						
+                        
+                        <edomvds>NJDEP</edomvds>
+                                                					
+                    
+                    </edom>
+                                        				
+                
+                </attrdomv>
+                <attrdomv>
+                                        					
+                    
+                    <edom>
+                                                						
+                        
+                        <edomv>Hard Copy Map</edomv>
+                                                						
+                        
+                        <edomvd>The coordinate was determined with the aid of a hard copy map of undocumented scale or projection.</edomvd>
+                                                						
+                        
+                        <edomvds>NJDEP</edomvds>
+                                                					
+                    
+                    </edom>
+                                        				
+                
+                </attrdomv>
+                <attrdomv>
+                                        					
+                    
+                    <edom>
+                                                						
+                        
+                        <edomv>Other/Unknown</edomv>
+                                                						
+                        
+                        <edomvd>The method in which the coordinates were captured is other or unknown.</edomvd>
+                                                						
+                        
+                        <edomvds>NJDEP</edomvds>
+                                                					
+                    
+                    </edom>
+                                        				
+                
+                </attrdomv>
+                <attrdomv>
+                                        					
+                    
+                    <edom>
+                                                						
+                        
+                        <edomv>Approx. Addr. Match</edomv>
+                                                						
+                        
+                        <edomvd>The site coordinate was generated through an address matching process.  In this instance the match was made to a location somewhere on the street - the location could not be further clarified.</edomvd>
+                                                						
+                        
+                        <edomvds>NJDEP</edomvds>
+                                                					
+                    
+                    </edom>
+                                        				
+                
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>COORD_ORIGIN (Alias: Coordinate Origin)</attrlabl>
+                <attrdef>The origin of the site's coordinate location.</attrdef>
+                <attrdefs>NJDEP</attrdefs>
+                <attrdomv>
+                                        					
+                    
+                    <edom>
+                                                						
+                        
+                        <edomv>DEP-GIS</edomv>
+                                                						
+                        
+                        <edomvd>The site coordinate was generated by NJDEP's Bureau of GIS.</edomvd>
+                                                						
+                        
+                        <edomvds>NJDEP</edomvds>
+                                                					
+                    
+                    </edom>
+                                        				
+                
+                </attrdomv>
+                <attrdomv>
+                                        					
+                    
+                    <edom>
+                                                						
+                        
+                        <edomv>DEP-Program</edomv>
+                                                						
+                        
+                        <edomvd>The site coordinate was obtained from NJDEP program, most likely from a legacy pre-NJEMS environmental database.</edomvd>
+                                                						
+                        
+                        <edomvds>NJDEP</edomvds>
+                                                					
+                    
+                    </edom>
+                                        				
+                
+                </attrdomv>
+                <attrdomv>
+                                        					
+                    
+                    <edom>
+                                                						
+                        
+                        <edomv>Submittal Document</edomv>
+                                                						
+                        
+                        <edomvd>The site coordinate was obtained from a document submitted to NJDEP, most likely a permit.</edomvd>
+                                                						
+                        
+                        <edomvds>NJDEP</edomvds>
+                                                					
+                    
+                    </edom>
+                                        				
+                
+                </attrdomv>
+                <attrdomv>
+                                        					
+                    
+                    <edom>
+                                                						
+                        
+                        <edomv>EPA</edomv>
+                                                						
+                        
+                        <edomvd>The site coordinate was obtained from the US Environmental Protection Agency.</edomvd>
+                                                						
+                        
+                        <edomvds>NJDEP</edomvds>
+                                                					
+                    
+                    </edom>
+                                        				
+                
+                </attrdomv>
+                <attrdomv>
+                                        					
+                    
+                    <edom>
+                                                						
+                        
+                        <edomv>County</edomv>
+                                                						
+                        
+                        <edomvd>The site coordinate was obtained from a NJ county agency, most likely a county health department or planning office.</edomvd>
+                                                						
+                        
+                        <edomvds>NJDEP</edomvds>
+                                                					
+                    
+                    </edom>
+                                        				
+                
+                </attrdomv>
+                <attrdomv>
+                                        					
+                    
+                    <edom>
+                                                						
+                        
+                        <edomv>Other/Unknown</edomv>
+                                                						
+                        
+                        <edomvd>The site coordinate is of unknown origin.</edomvd>
+                                                						
+                        
+                        <edomvds>NJDEP</edomvds>
+                                                					
+                    
+                    </edom>
+                                        				
+                
+                </attrdomv>
+                <attrdomv>
+                                        					
+                    
+                    <edom>
+                                                						
+                        
+                        <edomv>Address Match</edomv>
+                                                						
+                        
+                        <edomvd>The site coordinate was derived from an address matching process using either TIGER2000 or GDT road bases.</edomvd>
+                                                						
+                        
+                        <edomvds>NJDEP</edomvds>
+                                                					
+                    
+                    </edom>
+                                        				
+                
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>MUN_CODE (Alias: Municipal Code)</attrlabl>
+                <attrdef>Municipal code (NJ-1040)</attrdef>
+                <attrdefs>New Jersey Department of Treasury</attrdefs>
+                <attrdomv>
+                                        					
+                    
+                    <codesetd>
+                                                						
+                        
+                        <codesetn>Municipal code (NJ-1040)</codesetn>
+                                                						
+                        
+                        <codesets>New Jersey Department of Treasury</codesets>
+                                                					
+                    
+                    </codesetd>
+                                        				
+                
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>PI_AIR (Alias: Program Interest Number Air)</attrlabl>
+                <attrdef>Program Interest number used for the site in the air program.</attrdef>
+                <attrdefs>NJDEP</attrdefs>
+                <attrdomv>
+                                        					
+                    
+                    <udom>Unique value</udom>
+                                        				
+                
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>PI_Other (Alias: Program Interest Number Other)</attrlabl>
+                <attrdef>Program interest number used for the site in other DEP program areas.</attrdef>
+                <attrdefs>NJDEP</attrdefs>
+                <attrdomv>
+                                        					
+                    
+                    <udom>Unique value</udom>
+                                        				
+                
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>PI_WATER (Alias: Program Interest Number Water)</attrlabl>
+                <attrdef>Program interest used for the site in the water program</attrdef>
+                <attrdefs>NJDEP</attrdefs>
+                <attrdomv>
+                                        					
+                    
+                    <udom>Unique value</udom>
+                                        				
+                
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>EJLAW_SCRAP_METAL_FACILITY (Alias: EJ Law Scrap Metal Facility)</attrlabl>
+                <attrdef>A flag used to identify the facility as a Scrap metal facility regulated under the EJ Law.</attrdef>
+                <attrdefs>NJDEP</attrdefs>
+                <attrdomv>
+                                        					
+                    
+                    <edom>
+                                                						
+                        
+                        <edomv>Yes</edomv>
+                                                						
+                        
+                        <edomvd>The facility is a Scrap metal facility regulated under the EJ Law.</edomvd>
+                                                						
+                        
+                        <edomvds>NJDEP</edomvds>
+                                                					
+                    
+                    </edom>
+                                        					
+                    
+                    <edom>
+                                                						
+                        
+                        <edomv>No</edomv>
+                                                						
+                        
+                        <edomvd>The facility is not a Scrap metal facility regulated under the EJ Law.</edomvd>
+                                                						
+                        
+                        <edomvds>NJDEP</edomvds>
+                                                					
+                    
+                    </edom>
+                                        				
+                
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>SHAPE</attrlabl>
+                <attrdef>Feature geometry.</attrdef>
+                <attrdefs>Esri</attrdefs>
+                <attrdomv>
+                                        					
+                    
+                    <udom>Coordinates defining the features.</udom>
+                                        				
+                
+                </attrdomv>
+            </attr>
+        </detailed>
+    </eainfo>
+    <distinfo>
+        <distrib>
+            <cntinfo>
+                <cntorgp>
+                    <cntorg>NJDEP/DOIT/Bureau of GIS</cntorg>
+                    <cntper>GIS Help Desk</cntper>
+                </cntorgp>
+                <cntaddr>
+                    <addrtype>mailing and physical</addrtype>
+                    <address>401 East State Street</address>
+                    <city>Trenton</city>
+                    <state>NJ</state>
+                    <postal>08625</postal>
+                </cntaddr>
+                <cntvoice>(609) 777-0672</cntvoice>
+                <cntfax>(609) 292-7900</cntfax>
+                <cntemail>gisnet@dep.nj.gov</cntemail>
+            </cntinfo>
+        </distrib>
+        <resdesc>Downloadable Data</resdesc>
+        <distliab>The State of New Jersey makes great effort to provide secure, accurate, and complete data and metadata. However, portions of the data and metadata may be incorrect or not current. Any errors or omissions should be reported for investigation. The State of New Jersey, its officers, employees or agents shall not be liable for damages or losses of any kind arising out of or in connection with the use or performance of data and metadata, including but not limited to, damages or losses caused by reliance upon the accuracy or timeliness of any such data and metadata, or damages incurred from the viewing, distributing, or copying of those materials. The data and metadata are provided "as is." No warranty of any kind, implied, expressed, or statutory, including but not limited to the warranties of non-infringement of third party rights, title, merchantability, fitness for a particular purpose, and freedom from computer virus, is given with respect to the data and metadata, or its hyperlinks to other Internet resources. The State disclaims any duty or obligation either to maintain availability of or to update the data and metadata.</distliab>
+        <stdorder>
+            <digform>
+                <digtinfo>
+                    <formname>DEP distributes ESRI .SHP and/or GDB. Some data may be NJ GeoWeb "display only" layers.</formname>
+                    <formvern>latest version</formvern>
+                    <filedec>WinZip</filedec>
+                </digtinfo>
+                <digtopt>
+                    <onlinopt>
+                        <computer>
+                            <networka>
+                                <networkr>https://www.nj.gov/dep/gis/geowebsplash.htm</networkr>
+                            </networka>
+                        </computer>
+                        <computer>
+                            <networka>
+                                <networkr>https://www.nj.gov/dep/gis</networkr>
+                            </networka>
+                        </computer>
+                    </onlinopt>
+                </digtopt>
+            </digform>
+            <fees>None</fees>
+            <ordering>All available NJDEP public GIS data can be downloaded for free. Some data shown in NJGeoWeb application may not yet be available for download due to various data or distribution issues. Please email gisnet@dep.nj.gov with any data distribution questions.</ordering>
+        </stdorder>
+    </distinfo>
+    <metainfo>
+        <metd>20241201</metd>
+        <metc>
+            <cntinfo>
+                <cntorgp>
+                    <cntorg>New Jersey Department of Environmental Protection (NJDEP), Bureau of NJPDES Stormwater Permitting &amp; Water Quality Management</cntorg>
+                    <cntper>Gabriel Mahon</cntper>
+                </cntorgp>
+                <cntaddr>
+                    <addrtype>physical</addrtype>
+                    <address>501 East State Street</address>
+                    <city>Trenton</city>
+                    <state>NJ</state>
+                    <postal>08625</postal>
+                </cntaddr>
+                <cntvoice>609-292-5493</cntvoice>
+                <cntemail>Gabriel.Mahon@dep.nj.gov</cntemail>
+            </cntinfo>
+        </metc>
+        <metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+        <metstdv>FGDC-STD-001-1998</metstdv>
+        <mettc>local time</mettc>
+    </metainfo>
+</metadata>
