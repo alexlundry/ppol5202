@@ -1,0 +1,574 @@
+---
+title: "PPOL 5202 Week 11 - Animation & Interaction"
+author: "Alex Lundry"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+Animation of plots in R can be fairly straightforward.
+It can also be stunningly complex.
+We'll focus on the straightforward ones - you'll have to wrap your head around some of the lingo, but once you get the drift it's not that difficult.
+
+We'll be using `gganimate` to do our animating.
+If you don't already have this or `gifski` and `av` as an installed library, you'll want to do that (these are what support the creation of GIF and movie files respectively. Yet again, we'll be using the `gapminder` dataset.
+
+## Animated Bubble Chart
+
+Load the necessary libraries:
+
+```{r message=FALSE, warning=FALSE}
+# install.packages(c("gifski", "av", "gganimate"))
+
+library(gapminder)
+library(tidyverse)
+library(gganimate)
+library(scales)
+```
+
+`gganimate` is built on top of `ggplot`, so the general approach is to first get a solid static ggplot visualization that we can use as our base, and once we have that, we animate it.
+Let's begin with a robust, but completely standard ggplot call:
+
+1.  Call ggplot to use the gapminder data, with gdpPercap mapped to X axis, lifeExp to Y, pop to size, and continent to color
+2.  Make it a scatterplot, since there are a lot of points, let's give it some transparency by setting the alpha to 0.7, and let's hide the legend.
+3.  The data came with pre-set colors for each country, let's use it.
+4.  Let's scale the size of the points to something reasonable, 2 on the low end and 12 at max.
+5.  Put the X axis on a log scale.
+6.  Facet by continent
+7.  Set our labels.
+
+```{r message=FALSE, warning=FALSE}
+p1 <- ggplot(gapminder, aes(gdpPercap, lifeExp, size = pop, color = country)) +
+   geom_point(alpha = 0.7, show.legend = FALSE) +
+   scale_color_manual(values = country_colors) +
+   scale_size(range = c(2, 12)) +
+   scale_x_log10(labels = label_currency(prefix = "$")) +
+   facet_wrap(~continent) +
+   theme_bw() +
+   labs(title = "Year: 1952-2007", x = "GPD per capita", y = "Life Expectancy")
+
+print(p1)
+```
+
+To turn it into an animation, we simply add a few functions:
+
+1.  a new `labs` function overwrites the previous one, so we can **dynamically** display the changing years as the data points move across the plot. Note the curly brackets enclosing the variable `frame_time` that will allow the year to dynamically display.
+2.  the `transition_time` function takes in the year variable as an input and it allows the animated plot to transition frame by frame as a function of the year variable.
+3.  `ease_aes` function takes in linear as an input argument and it defines how the transition occurs from frame to frame (in this case, linear). More on this below...
+4.  since we saved this to p2, we now need to explicitly display it, so we call the `animate` function.
+5.  the `anim_save` function allows the animated plot to be rendered to a .GIF file.
+
+```{r message=FALSE, warning=FALSE}
+p2 <- p1 +
+   labs(title = "Year: {frame_time}", x = "GDP per capita", y = "Life Expectancy") +
+   transition_time(year) +
+   ease_aes('linear')
+
+animate(p2)
+anim_save("plots/gapminder1.gif")
+```
+
+The `ease_aes` function defines how a value changes to another value during it's animated transition from one state to another.
+Will it progress linearly, or maybe start slowly and then build up momentum?
+Your ease function will determine that.
+Here are the available options and what they do:
+
+-   **quadratic** Models a power-of-2 function
+-   **cubic** Models a power-of-3 function
+-   **quartic** Models a power-of-4 function
+-   **quintic** Models a power-of-5 function
+-   **sine** Models a sine function
+-   **circular** Models a pi/2 circle arc
+-   **exponential** Models an exponential function
+-   **elastic** Models an elastic release of energy
+-   **back** Models a pullback and release
+-   **bounce** Models the bouncing of a ball
+
+Ok, you're thinking...I have no idea what any of that actually means.
+Neither do I really.
+So just use this resource that can give you a sense of how each of these easing functions behave: <https://easings.net/>
+
+There are also modifiers you can apply to these ease functions: -**in** The easing function is applied as-is -**out** The easing function is applied in reverse -**in-out** The first half of the transition it is applied as-is, while in the last half it is reversed
+
+I wouldn't overthink this - just choose something that looks good to you!
+
+### Show preceding frames with gradual falloff
+
+We can use `shadow_wake()` to draw a small wake after the data by showing the latest frames up to the current.
+You can choose to gradually diminish the size and/or opacity of the shadow.
+The length of the wake is not given in absolute frames, it is given as a proportion of the total length of the animation, so the example below gives us a wake of points from the last 30% of frames.
+The alpha value is set here to FALSE so that the shadows are not transparent, but you can either set that to TRUE or a numeric (0-1) indicating what the alpha should be.
+Notice that we are simply layering on a `shadow_wake()` function call to the previously saved p2 object.
+
+```{r message=FALSE, warning=FALSE}
+p3 <- p2 + 
+   shadow_wake(wake_length = 0.3, alpha = FALSE)
+
+animate(p3)
+
+anim_save("plots/gapminder2.gif")
+```
+
+### Show the original data as trail
+
+Alternatively we can use `shadow_trail()` to show the original data as a trail.
+The parameter `distance` means the animation will keep the points from 30% of the frames, spaced as evenly as possible.
+
+```{r message=FALSE, warning=FALSE}
+p4 <- p2 +
+   shadow_trail(distance = 0.3)
+
+animate(p4)
+
+anim_save("plots/gapminder3.gif")
+```
+
+### Reveal data along a given dimension
+
+We can also use **gganimate** to reveal data along a specific dimension.
+This is most useful for time series data in which you can show the change over time.
+Remember the NVDIA versus Intel line graph from last week?
+Let's recreate that.
+In the R code below, we are using the `tidyquant` library, which we have used before, to get the stock prices for NVDIA and INTC.
+We are doing some custom theming to try to come close to the look of the original.
+And then we are doing a basic ggplot line graph.
+
+```{r message=FALSE, warning=FALSE}
+library(tidyquant)
+stocks <- tq_get(c("NVDA", "INTC"), get = "stock.prices")
+
+black_theme <- theme_minimal(base_family = "Helvetica") +
+  theme(plot.background = element_rect(fill = "black", color = NA), 
+        panel.background = element_rect(fill = "black", color = NA),
+        legend.background = element_rect(fill = "black", color = NA), 
+        text = element_text(color = "white"), 
+        axis.text = element_text(color = "white"), 
+        axis.title = element_text(color = "white"), 
+        legend.text = element_text(color = "white"), 
+        legend.title = element_text(color = "white"),
+        plot.title = element_text(color = "white", size = 30, face = "bold"), 
+        plot.subtitle = element_text(color = "white", size = 12),
+        plot.caption = element_text(color = "white", size = 12),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
+p5 <- ggplot(stocks, aes(date, close, color = symbol)) +
+  geom_line(size = 1) +
+  scale_y_continuous(labels = label_dollar()) +
+  scale_x_date() +
+  scale_color_manual(values = c("NVDA" = "white", "INTC" = "red")) +
+  labs(title = "NVIDIA versus Intel", color = "Ticker Symbol",
+       x = "Date", y = "Daily Close Price $") +
+  black_theme
+
+p5
+```
+
+We can then call `transition_reveal` to let the data gradually appear, day by day.
+The `geom_point` call means that as it appears it shows a point.
+We add a custom subtitle here that displays the date, by using the variable `{frame_along}`, and then we make the display axes dynamic, moving and changing as the data changes by adding the function `view_follow()`.
+For that last function we could have fixed the X or Y axis as a parameter, but to mimic the original we don't fix either one.
+
+The last thing we do is animate it.
+But notice the additional parameters.
+Remember how the original one took interminably long?
+We want to change that.
+Fortunately the animation function let's us set a few key parameters:
+
+-   the frames per second, which we talked about last week, gets at how smooth the animation is. We do 15 fps here as that is the bare minimum for smoothing.
+-   we can also specify how long we want the animation to last. We set it for 30 seconds.
+-   finally, we can dictate how long it rests at the end of the animation before it loops again. This is NOT the number of seconds to pause, but rather the number of times to repeat the last frame. We set it here to repeat 100 times.
+
+There are many other useful parameters to this function, like a start pause or a rewind.
+
+```{r message=FALSE, warning=FALSE}
+# install.packages("transformr")
+p6 <- p5 +
+   transition_reveal(date) +
+   geom_point(size = 3, show.legend = FALSE) +
+   labs(subtitle = "{frame_along}") +
+   view_follow()
+
+# Animate with specified fps for speed control
+animate(p6, fps = 15, duration = 30, end_pause = 100)
+
+anim_save("plots/nvidia.gif")
+```
+
+### Morphing Bar Charts
+
+There may also be times when animating bar charts could be useful.
+Here we create a bar chart and then add an additional aesthetic called `transition_states` that provides a frame variable of year.
+For each value of the variable, a step on the chart will be drawn.
+The `transition_length` tells us how long the transition should be and the `state_length` is how long it rests at a particular state.
+Here they are set to be equal.
+Notice that we've also changed up our `ease_aes` function to "sine-in-out" (not for any particular reason).
+
+```{r message=FALSE, warning=FALSE}
+p7 <- gapminder %>% 
+   group_by(year, continent) %>% 
+   summarize(cont_pop = sum(pop)) %>% 
+   ggplot(aes(reorder(continent, -cont_pop), cont_pop, fill = continent)) +
+   geom_bar(stat = "identity") +
+   scale_y_continuous(labels = label_comma(scale = 1/1e9, suffix = "B")) +
+   transition_states(year, transition_length = 2, state_length = 2) +
+   ease_aes('sine-in-out') +
+   labs(title = "Population in {closest_state}", 
+        x = "Continent", y = "Population")
+
+animate(p7)
+
+anim_save("plots/gapminder5.gif")
+```
+
+We could just as easily have used the `transition_time` function here since we are using time as our animating variable.
+If we did that, our label would instead reference `{frame_time}` instead of `{closest_state}` and we would NOT have control over the transition length or state length.
+We wouldn't have that control because for `transition_time` gganimate treats the time variable as continuous, so the transition length is based on the actual values.
+Notice the difference between the two!
+
+```{r}
+p8 <- gapminder %>% 
+   group_by(year, continent) %>% 
+   summarize(cont_pop = sum(pop)) %>% 
+   ggplot(aes(reorder(continent, -cont_pop), cont_pop, fill = continent)) +
+   geom_bar(stat = "identity") +
+   scale_y_continuous(labels = label_comma(scale = 1/1e9, suffix = "B")) +
+   transition_time(year) +
+   ease_aes('sine-in-out') +
+   labs(title = "Population in {frame_time}",
+        x = "Continent", y = "Population")
+
+animate(p8)
+
+anim_save("plots/gapminder6.gif")
+```
+
+### Dynamic Maps with Leaflet
+
+Leaflet is a powerful open-source JavaScript library for building interactive maps in HTML.
+
+The architecture is very similar to ggplot2, but instead of putting data-based layers on top of a static map, leaflet allows you to put data-based layers on top of an interactive map.
+
+A leaflet map widget is created with the `leaflet()` command.
+We then add layers to the widget.
+The first layer that we will add is a tile layer containing all of the static map information, which by default comes from OpenStreetMap.
+The second layer we will add here is a marker, which designates a point location.
+Notice how the `addMarkers()` function can take a data argument, just like a geom\_\*() layer in ggplot2 would.
+
+Below, we get started by creating a data frame containing the White House and then call tidygeocoder's `geocode` function to get lat and long.
+After loading the leaflet library, we create a new object by calling `leaflet` to create a widget, `add_tiles` and finally `addMarkers` in which we designate the data set.
+
+```{r message=FALSE, warning=FALSE}
+white_house <- tibble(
+   address = "The White House, Washington, DC"
+) %>% 
+   tidygeocoder::geocode(address, method = "osm")
+
+library(leaflet)
+
+white_house_map <- leaflet() %>% 
+   addTiles() %>% 
+   addMarkers(data = white_house)
+
+white_house_map
+```
+
+You can scroll and zoom at will!
+
+You can also add a pop-up to provide more information about a particular location.
+Notice how we only need to call the previously saved leaflet map and then add a Popup layer to it.
+
+```{r message=FALSE, warning=FALSE}
+white_house <- white_house %>% 
+   mutate(title = "The White House", 
+          street_address = "1600 Pennsylvania Ave")
+
+white_house_map %>% 
+   addPopups(data = white_house, 
+             popup = ~paste0("<b>", title, "</b></br>", street_address))
+```
+
+There are several different providers of tiles.
+Below we'll demonstrate two others, and we'll also see how we can set a specific view and zoom level by giving it a lat and long and designating the zoom level desired.
+
+```{r message=FALSE, warning=FALSE}
+# Background 1: NASA
+leaflet() %>% 
+   addTiles() %>% 
+   setView(lng = 2.34, lat = 48.85, zoom = 5) %>% 
+   addProviderTiles("NASAGIBS.ViirsEarthAtNight2012")
+```
+
+```{r message=FALSE, warning=FALSE}
+# Background 2: World Imagery
+leaflet() %>% 
+   addTiles() %>% 
+   setView(lng = 2.34, lat = 48.85, zoom = 3) %>% 
+   addProviderTiles("Esri.WorldImagery")
+```
+
+Here are some especially popular provider tiles that Leaflet provides:
+
+-   Nasa: NASAGIBS.ViirsEarthAtNight2012
+-   Google map: Esri.WorldImagery
+-   Gray: Esri.WorldGrayCanvas
+-   Terrain: Esri.WorldTerrain
+-   Topo Map: Esri.WorldTopoMap
+
+And this is a great [website](http://leaflet-extras.github.io/leaflet-providers/preview/index.html) where you can preview all the available ones.
+
+### Choropleth Maps
+
+You can create choropleth maps in Leaflet.
+Here we'll be showing 2016 House election results in NC using the `fec16` package that has detailed election results by congressional district.
+We call their `results_house` dataset, do some clean up and then join it into their `candidates` dataset.
+From there we filter to North Carolina, group by the district and create some summary variables for each CD.
+
+```{r message=FALSE, warning=FALSE}
+# install.packages("fec16")
+library(fec16)
+
+nc_results <- results_house %>% # built in fec16 data
+   mutate(district = parse_number(district_id)) %>% 
+   left_join(candidates, by = "cand_id") %>% # candidates is also built in fec16 data
+   select(state, district, cand_name, party, general_votes) %>% 
+   arrange(desc(general_votes)) %>% 
+   filter(state == "NC") %>% 
+   group_by(state, district) %>% 
+   summarize(N = n(), 
+             total_votes = sum(general_votes, na.rm = T),
+             d_votes = sum(ifelse(party == "DEM", general_votes, 0), na.rm = T),
+             r_votes = sum(ifelse(party == "REP", general_votes, 0), na.rm = T),
+             other_votes = total_votes - d_votes - r_votes, 
+             r_prop = r_votes / total_votes, 
+             winner = ifelse(r_votes > d_votes, "Republican", "Democrat"))
+
+nc_results
+```
+
+Now we need a congressional district shapefile for the 114th Congress.
+Did you know that the `tigris` package also can give you those?
+You get those from the `congressional_districts()` function, and we tell it the state, the year that we need CD files for (it defaults to 2021, so we need to explicitly tell it this is for a 2016 election so it gets the right districts), and we give it `cb = TRUE` to get the most detailed map data.
+We also need to load up the `sf` library so we can work with sf data.
+
+```{r message=FALSE, warning=FALSE}
+library(sf)
+library(tigris)
+options(tigris_use_cache = TRUE, tigris_progress = FALSE)
+
+nc_map <- congressional_districts(cb = TRUE, state = "NC", year = 2016, progress = FALSE)
+
+ggplot(nc_map) +
+   geom_sf() +
+   theme_void()
+```
+
+We need to merge in the election data with the shape file.
+Here we merge the nc_shp polygons with the nc_results election data frame using the district as the key.
+
+```{r message=FALSE, warning=FALSE}
+nc_merged <- nc_map %>% 
+   mutate(district = str_remove(CD115FP, "^0+") %>% as.numeric) %>% # removing the leading zero in the CD designator 
+   left_join(nc_results, by = "district")
+
+glimpse(nc_merged)
+```
+
+We can then use Leaflet.
+First we will define a color palette over the values [0,1] that ranges from red to blue.
+According to the documentation, `colorNumeric()`:
+
+> Conveniently maps data values (numeric or factor/character) to colors according to a given palette, which can be provided in a variety of formats.
+
+The palette argument can be any of the following:
+
+-   A character vector of RGB or named colors. Examples: c("#000000", "#0000FF", "#FFFFFF")
+-   The name of an RColorBrewer palette, e.g. "BuPu" or "Greens".
+-   The full name of a viridis palette: "viridis", "magma", "inferno", or "plasma".
+-   A function that receives a single value between 0 and 1 and returns a color. Examples: colorRamp(c("#000000", "#FFFFFF"), interpolate = "spline").
+
+The `domain` parameter tells it the possible values that can be mapped.
+Once created it, you'll see that it simply returns a function.
+
+```{r message=FALSE, warning=FALSE}
+pal <- colorNumeric(palette = "RdBu", domain = c(0,1))
+
+pal
+```
+
+To make the plot in Leaflet, we have to add the tiles, and then the polygons defined by the sf object nc_merged.
+Since it is already an SF object, we do not need to give it any explicit polygon arguments in terms of X and Y.
+Instead, we need to manipulate the weight, fillOpacity, and color, while also designating the text of the popup.
+
+-   The weight controls the stroke width in pixels.\
+-   The color indicates what the border color should be.
+-   fillColor is how the polygons should be colored; here is where we call the function we created above. Since we chose a Red to Blue color pallete that mapped from 0 to 1, we actually need to flip the variable in order to associate higher values with Red. Thus we map '1-r_prop' to color; notice how we put a tilde in front of it to indicate that it is a function call.\
+-   The fillOpacity does what you think it would, functioning essentially as an alpha argument.\
+-   The popup argument is also a function since it will vary based on the object. That function creates text that shows the district number and the proportion of Republican votes. Notice that to do a line break here, we have to use HTML code `</br>` because this is an interactive viz rendered in HTML.
+
+```{r message=FALSE, warning=FALSE}
+leaflet_nc <- leaflet(nc_merged) %>% 
+   addProviderTiles(providers$CartoDB.Positron) %>% 
+   addPolygons(
+      weight = 1,
+      color = "grey",
+      fillColor = ~pal(1-r_prop),
+      fillOpacity = 0.7,
+      popup = ~str_c("<b>District ", district, "</b></br>", "GOP = ", round(r_prop * 100, 0), "%")) %>% 
+   setView(lng = -80, lat = 35, zoom = 7)
+
+leaflet_nc
+```
+
+We might want to add a state border here.
+To do so, we'll need to get a state sf object using `tigris`, and then we simply add another `addPolygons` function call, this time pointing it specifically at the state sf object.
+We can set some options like the weight and color of the border, but the most important thing to do here is to tell it NOT to fill the object because that would obstruct our county fills.
+
+```{r}
+nc_state_map <- states(progress = FALSE) %>% 
+   filter(NAME == "North Carolina")
+
+leaflet_nc <- leaflet(nc_merged) %>% 
+   addProviderTiles(providers$CartoDB.Positron) %>% 
+   addPolygons(
+      weight = 1,
+      color = "grey",
+      fillColor = ~pal(1-r_prop),
+      fillOpacity = 0.7,
+      popup = ~str_c("<b>District ", district, "</b></br>", "GOP = ", round(r_prop * 100, 0), "%")) %>% 
+   addPolygons(
+      data = nc_state_map,
+      weight = 2, 
+      color = "#000000", 
+      fill = FALSE) %>% # Do not fill the inside of the state; only draw the border
+   setView(lng = -80, lat = 35, zoom = 7)
+
+leaflet_nc
+```
+
+### Plotly Interactive Graphics
+
+`ggplotly` is a library built and maintained by Plotly that allows you to convert any ggplot visualization into a plotly visualization using the `ggplotly()` function.
+It's actually quite straightforward for basic visualizations.
+
+Below we create our lollipop chart from the bivariate lesson.
+
+```{r}
+i1 <- gapminder %>%
+  filter(continent == "Asia" & 
+           year == 2007) %>% 
+  ggplot(aes(lifeExp, reorder(country, lifeExp))) +
+  geom_segment(aes(x = 40, 
+               xend = lifeExp, 
+               y = reorder(country, lifeExp), 
+               yend = reorder(country, lifeExp)),
+               color = "lightgrey") +
+  geom_point(color="darkred", size = 2) +
+  labs (x = "Life Expectancy (years)",
+        y = "",
+        title = "Life Expectancy by Country",
+        subtitle = "Gapminder data for Asia - 2007") +
+  theme_minimal() + 
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
+i1
+```
+
+All you need to do is pass it the `ggplotly()` function and it creates an interactive graphic.
+Notice the interactive controls that appear in the upper right corner of the graphic, as well as the hover text you get as you pass over the graphic.
+
+```{r}
+library(plotly)
+
+ggplotly(i1)
+```
+
+We can clean up the labeling - the easiest way to do this is to add the labeling you want to your dataset and then pass it as a `text` aesthetic in your initial ggplot call, you then use the aesthetic name as your `tooltip` parameter (NOT the var name!).
+
+```{r}
+i1 <- gapminder %>%
+  filter(continent == "Asia" & 
+           year == 2007) %>% 
+   mutate(label_text = str_c(country, ": ", round(lifeExp, 1))) %>% 
+  ggplot(aes(lifeExp, reorder(country, lifeExp), text = label_text)) +
+  geom_segment(aes(x = 40, 
+               xend = lifeExp, 
+               y = reorder(country, lifeExp), 
+               yend = reorder(country, lifeExp)),
+               color = "lightgrey") +
+  geom_point(color="darkred", size = 2) +
+  labs (x = "Life Expectancy (years)",
+        y = "",
+        title = "Life Expectancy by Country",
+        subtitle = "Gapminder data for Asia - 2007") +
+  theme_minimal() + 
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
+ggplotly(i1, tooltip = "label_text")
+```
+
+Here's another example with a scatterplot.
+Notice the mutate statement that gets us a nice label, and that it is mapped to the `text` aesthetic.
+The `\n` tells it to go to a new line.
+
+```{r}
+library(scales)
+i2 <- gapminder %>% 
+   mutate(label_text = str_c(country, " ", year, ": \nGDP per cap = ", dollar(round(gdpPercap, 0)), "\nLife Exp = ", round(lifeExp, 1))) %>% 
+   ggplot(aes(gdpPercap, lifeExp, text = label_text)) +
+   geom_point() +
+   scale_x_log10(label = label_comma())
+
+i2
+```
+
+We call ggplotly and tell it what aesthetic mapping to use for the tooltip.
+Also notice how we can zoom in and out of the viz.
+
+```{r}
+ggplotly(i2, tooltip = "label_text")
+```
+
+And one more, this time with a time series.
+One funky thing here is that I needed to add a `group = 1` aesthetic once I added the text aesthetic.
+I needed to tell ggplot that there was only one group of data - when it saw the text aesthetic it thought there were many.
+
+```{r}
+i3 <- economics %>% 
+   mutate(label_text = str_c(date, ": ", psavert, "%")) %>% 
+   ggplot(aes(x = date, y = psavert, text = label_text, group = 1)) +
+  geom_line(color = "indianred3", 
+            size=1 ) +
+  geom_smooth() +
+  scale_x_date(date_breaks = '5 years', 
+               labels = label_date("%b-%y")) +
+  labs(title = "Personal Savings Rate",
+       subtitle = "1967 to 2015",
+       x = "",
+       y = "Personal Savings Rate") +
+  theme_minimal()
+
+ggplotly(i3, tooltip = "label_text")
+```
+
+You can also do direct Plotly functions, skipping ggplot entirely.
+This is especially useful when they have a chart format that isn't easily available in ggplot, such as a stock candlestick chart.
+Below, I use the `tidyquant` library to easily get stock information for Google, which I then pass into a `plot_ly` function.
+
+```{r message=FALSE, warning=FALSE}
+library(tidyquant)
+
+prices <- tq_get("GOOGL")
+
+prices %>%
+   plot_ly(x = ~date,
+           type = "candlestick",
+           open = ~open,
+           close = ~close,
+           high = ~high,
+           low = ~low, 
+           split = ~symbol)
+```
+
+For more on Plotly you can use this [cheat sheet](https://images.plot.ly/plotly-documentation/images/r_cheat_sheet.pdf?_ga=2.214086935.1631915434.1573265049-1656343979.1569706942), or you can visit the [Plotly R Open Source Graphing Library](https://plotly.com/r/).
