@@ -6,10 +6,13 @@ output: html_document
 ---
 
 Animation of plots in R can be fairly straightforward.
+
 It can also be stunningly complex.
+
 We'll focus on the straightforward ones - you'll have to wrap your head around some of the lingo, but once you get the drift it's not that difficult.
 
 We'll be using `gganimate` to do our animating.
+
 If you don't already have this or `gifski` and `av` as an installed library, you'll want to do that (these are what support the creation of GIF and movie files respectively. Yet again, we'll be using the `gapminder` dataset.
 
 ## Animated Bubble Chart
@@ -168,11 +171,7 @@ The `geom_point` call means that as it appears it shows a point.
 We add a custom subtitle here that displays the date, by using the variable `{frame_along}`, and then we make the display axes dynamic, moving and changing as the data changes by adding the function `view_follow()`.
 For that last function we could have fixed the X or Y axis as a parameter, but to mimic the original we don't fix either one.
 
-The last thing we do is animate it.
-But notice the additional parameters.
-Remember how the original one took interminably long?
-We want to change that.
-Fortunately the animation function let's us set a few key parameters:
+The last thing we do is animate it. But notice the additional parameters. Remember how the original one took interminably long? We want to change that. Fortunately the animation function let's us set a few key parameters:
 
 -   the frames per second, which we talked about last week, gets at how smooth the animation is. We do 15 fps here as that is the bare minimum for smoothing.
 -   we can also specify how long we want the animation to last. We set it for 30 seconds.
