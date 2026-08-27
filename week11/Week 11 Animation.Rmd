@@ -108,7 +108,7 @@ p3 <- p2 +
 
 animate(p3)
 
-anim_save("plots/gapminder2.gif")
+anim_save("plots/gapminder2.gif", animation = p3)
 ```
 
 ### Show the original data as trail
@@ -122,7 +122,7 @@ p4 <- p2 +
 
 animate(p4)
 
-anim_save("plots/gapminder3.gif")
+anim_save("plots/gapminder3.gif", animation = p4)
 ```
 
 ### Reveal data along a given dimension
@@ -190,7 +190,7 @@ p6 <- p5 +
 # Animate with specified fps for speed control
 animate(p6, fps = 15, duration = 30, end_pause = 100)
 
-anim_save("plots/nvidia.gif")
+anim_save("plots/nvidia.gif", animation = p6)
 ```
 
 ### Morphing Bar Charts
@@ -216,7 +216,7 @@ p7 <- gapminder %>%
 
 animate(p7)
 
-anim_save("plots/gapminder5.gif")
+anim_save("plots/gapminder5.gif", animation = p7)
 ```
 
 We could just as easily have used the `transition_time` function here since we are using time as our animating variable.
@@ -238,7 +238,7 @@ p8 <- gapminder %>%
 
 animate(p8)
 
-anim_save("plots/gapminder6.gif")
+anim_save("plots/gapminder6.gif", animation = p8)
 ```
 
 ### Dynamic Maps with Leaflet

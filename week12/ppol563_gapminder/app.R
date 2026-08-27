@@ -82,8 +82,8 @@ ui <- fluidPage(theme = shinytheme("superhero"),
 server <- function(input, output) {
 
    # Create the filtered data set of the two selected countries and the right years.
-   # This is done in a reactive expression so it creates a reactive variable for the dataset
-   # every time the inputs change, the dataset will update.
+   # This is done in a reactive expression so it creates a reactive variable for the dataset.
+   # Every time the inputs change, the dataset will update.
    # We include some error handling here in case the country inputs are NULL
    two_country_data <- reactive({
 
@@ -127,8 +127,8 @@ server <- function(input, output) {
       if(input$variable_from_gapminder == "gdpPercap") y_axis_label <- "GDP Per Capita (in US dollars)"
 
       p1 <- ggplot(two_country_data(), aes_string(x = "year",
-                                                  # notice that when we call the data in ggplot, we are calling
-                                                  # a reactive dataset, so we put parentheses after it
+                   # notice that when we call the data in ggplot, we are calling
+                   # a reactive dataset, so we put parentheses after it
                                                   y = input$variable_from_gapminder,
                                                   color = "country")) +
          geom_line(size = 1) +

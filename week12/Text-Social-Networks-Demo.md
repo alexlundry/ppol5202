@@ -16,26 +16,15 @@ Conservative, Moderate and Liberal.
 
 ``` r
 library(haven) # for reading SPSS data files
-```
-
-    ## Warning: package 'haven' was built under R version 4.3.3
-
-``` r
 library(tidyverse)
 ```
 
-    ## Warning: package 'ggplot2' was built under R version 4.3.3
-
-    ## Warning: package 'purrr' was built under R version 4.3.3
-
-    ## Warning: package 'lubridate' was built under R version 4.3.3
-
     ## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-    ## ✔ dplyr     1.1.4     ✔ readr     2.1.5
-    ## ✔ forcats   1.0.0     ✔ stringr   1.5.1
-    ## ✔ ggplot2   3.5.2     ✔ tibble    3.2.1
-    ## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
-    ## ✔ purrr     1.0.4     
+    ## ✔ dplyr     1.2.1          ✔ readr     2.2.0     
+    ## ✔ forcats   1.0.1          ✔ stringr   1.6.0     
+    ## ✔ ggplot2   4.0.3.9000     ✔ tibble    3.3.1     
+    ## ✔ lubridate 1.9.4          ✔ tidyr     1.3.2     
+    ## ✔ purrr     1.2.2          
     ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
     ## ✖ dplyr::filter() masks stats::filter()
     ## ✖ dplyr::lag()    masks stats::lag()
@@ -88,11 +77,10 @@ us to easily extract words from the open ended text using
 obvious reasons.
 
 ``` r
+# install.packages(c("tidytext", "ggwordcloud"))
 library(tidytext)
 library(ggwordcloud)
 ```
-
-    ## Warning: package 'ggwordcloud' was built under R version 4.3.3
 
 The first thing we’ll need to do is filter out stop words, including
 custom ones. Stop words are words that are commonly used that we are NOT
@@ -334,10 +322,9 @@ calculate statistics on network datasets, while `tidygraph` provides
 tidy wrappers to it.
 
 ``` r
+# install.packages(c("igraph", "tidygraph", "ggraph"))
 library(igraph)
 ```
-
-    ## Warning: package 'igraph' was built under R version 4.3.3
 
     ## 
     ## Attaching package: 'igraph'
@@ -404,9 +391,9 @@ whereas when plotting network data x and y are mapped to values derived
 from the topology of the network and which are by themselves
 meaningless.
 
-In other words, in general, network graphs do not have coordinates.
-Thus, there is no right way to draw a network graph. Visualizing a graph
-is more art than science, but several graph layout algorithms are
+In other words, in general, **network graphs do not have coordinates**.
+Thus, *there is no right way to draw a network graph*. Visualizing a
+graph is more art than science, but several graph layout algorithms are
 popular.
 
 For this demo, we’ll be working with node and edge data from the movie
@@ -709,11 +696,11 @@ swnet %>%
     ## # A tibble: 22 × 4
     ##    name           id good  community
     ##    <chr>       <dbl> <lgl> <chr>    
-    ##  1 R2-D2           0 TRUE  1        
+    ##  1 R2-D2           0 TRUE  3        
     ##  2 CHEWBACCA       1 TRUE  1        
     ##  3 C-3PO           2 TRUE  3        
-    ##  4 LUKE            3 TRUE  2        
-    ##  5 DARTH VADER     4 FALSE 1        
+    ##  4 LUKE            3 TRUE  1        
+    ##  5 DARTH VADER     4 FALSE 4        
     ##  6 CAMIE           5 TRUE  2        
     ##  7 BIGGS           6 TRUE  2        
     ##  8 LEIA            7 TRUE  1        
@@ -764,7 +751,7 @@ ggraph(swnet, "fr") +
 
     ## Warning: The `trans` argument of `continuous_scale()` is deprecated as of ggplot2 3.5.0.
     ## ℹ Please use the `transform` argument instead.
-    ## This warning is displayed once every 8 hours.
+    ## This warning is displayed once per session.
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
@@ -811,7 +798,8 @@ ggraph(swnet, "fr") +
 
 ![](Text-Social-Networks-Demo_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
 
-And finally you can facet by both a node and edge characteristic:
+And finally you can facet by both a node and edge characteristic, using
+`facet_graph`:
 
 ``` r
 ggraph(swnet, "fr") +
@@ -842,7 +830,7 @@ swnet %>%
     ## # A tibble: 22 × 5
     ##    name           id good  community centrality
     ##    <chr>       <dbl> <lgl> <chr>          <dbl>
-    ##  1 LUKE            3 TRUE  2              62.4 
+    ##  1 LUKE            3 TRUE  1              62.4 
     ##  2 LEIA            7 TRUE  1              45.6 
     ##  3 HAN            13 TRUE  1              37   
     ##  4 C-3PO           2 TRUE  3              12.1 
@@ -850,8 +838,8 @@ swnet %>%
     ##  6 RED LEADER     19 TRUE  2               6.75
     ##  7 BIGGS           6 TRUE  2               6.75
     ##  8 OBI-WAN        10 TRUE  1               3.12
-    ##  9 R2-D2           0 TRUE  1               2.5 
-    ## 10 DARTH VADER     4 FALSE 1               2.5 
+    ##  9 R2-D2           0 TRUE  3               2.5 
+    ## 10 DARTH VADER     4 FALSE 4               2.5 
     ## # ℹ 12 more rows
 
 Now we can plot it, mapping the size aesthetic to that centrality
@@ -878,9 +866,6 @@ ggraph(swnet, "linear") +
    scale_color_manual(values = c("black", "green")) +
    theme_graph()
 ```
-
-    ## Warning: ggrepel: 3 unlabeled data points (too many overlaps). Consider
-    ## increasing max.overlaps
 
 ![](Text-Social-Networks-Demo_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
 
